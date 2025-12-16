@@ -36,12 +36,14 @@ The script provides the following functions that can be called individually:
     ```
 
 2.  **Source the script**
+
     Load the functions into your current shell session by "sourcing" the script:
     ```bash
     source tweaks.sh
     ```
 
 3.  **Call the desired functions**
+
     Now you can call any of the available tweak functions directly.
     ```bash
     # Example: Apply the nanorc and bash aliases tweaks
