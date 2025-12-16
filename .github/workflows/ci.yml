@@ -32,11 +32,11 @@ jobs:
           source ./tweaks.sh
 
           # --- Test backup functionality for tweak_bash_prompt ---
-          echo "original bashrc content" > ~/.bashrc
+          echo "# original bashrc content" > ~/.bashrc
           tweak_bash_prompt
           echo "Checking for backup of .bashrc..."
           test -f ~/.bashrc.1
-          grep "original bashrc content" ~/.bashrc.1
+          grep "# original bashrc content" ~/.bashrc.1
 
           # --- Run remaining tweak functions ---
           tweak_bash_aliases
