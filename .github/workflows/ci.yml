@@ -17,30 +17,64 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        container-os: ["debian:12", "ubuntu:22.04"]
-        with-downloads: ["with-downloads", "no-downloads"]
+        container-os: ["debian:12", "debian:13","ubuntu:22.04", "ubuntu:24.04"]
     container: public.ecr.aws/docker/library/${{ matrix.container-os }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Install Dependencies
-        run: apt-get update && apt-get install -y wget git
+        run: apt-get update && apt-get install -y git
 
-      - name: Delete Files Directory
-        if: ${{ matrix.with-downloads == 'with-downloads' }}
-        run: rm -r files
-
-      - name: Run Install Script
-        run: ./install.sh "${{ github.repository }}/${{ github.ref_name }}"
-
-      - name: Test Tweaks
+      - name: Test First Run and Verification
         run: |
+          # Source the script to make functions available in the shell
+          source ./tweaks.sh
+
+          # --- Test backup functionality for tweak_bash_prompt ---
+          echo "original bashrc content" > ~/.bashrc
+          tweak_bash_prompt
+          echo "Checking for backup of .bashrc..."
+          test -f ~/.bashrc.1
+          grep "original bashrc content" ~/.bashrc.1
+
+          # --- Run remaining tweak functions ---
+          tweak_bash_aliases
+          tweak_inputrc
+          tweak_nanorc
+
+          # --- Verify tweak results ---
+          echo "Verifying tweak results..."
           shopt -s expand_aliases
           source ~/.bash_aliases
-          grep -E "export PS1.+parse_git_branch" ~/.bashrc
-          if [[ -f ~/.profile ]]; then source ~/.profile; fi
-          ll
-          grep -E "^set constantshow" ~/.nanorc
-          grep -E "history-search-backward" ~/.inputrc
-          echo ${PATH} | grep "/usr/local/sbin" 
+          ls # Check if 'ls' alias works
+          ll # Check if 'll' alias works
+          grep -qF '"\e[A": history-search-backward' ~/.inputrc
+          grep -qF "function parse_git_branch" ~/.bashrc
+          grep -qE "^[[:space:]]*set[[:space:]]+constantshow" ~/.nanorc
+
+      - name: Test Idempotency (run tweaks a second time)
+        run: |
+          source ./tweaks.sh
+
+          # Run all tweaks again
+          tweak_bash_aliases
+          tweak_inputrc
+          tweak_bash_prompt
+          tweak_nanorc
+
+          # Verify that no duplicates were created
+          echo "Verifying idempotency..."
+          test $(grep -c "alias ls=" ~/.bash_aliases) -eq 1
+          test $(grep -c "alias ll=" ~/.bash_aliases) -eq 1
+          test $(grep -c 'history-search-backward' ~/.inputrc) -eq 1
+          test $(grep -c "function parse_git_branch" ~/.bashrc) -eq 1
+          test $(grep -c "set constantshow" ~/.nanorc) -eq 1
+
+      - name: Test git dependency warning
+        run: |
+          apt-get remove -y git
+          source ./tweaks.sh
+          # Expect a non-zero exit code and a warning message
+          ! tweak_bash_prompt 2> stderr.log
+          grep "Warning: 'git' command not found" stderr.log

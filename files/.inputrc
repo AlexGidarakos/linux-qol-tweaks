@@ -1,4 +1,0 @@
-"\e[A": history-search-backward  # Up arrow key
-"\e[B": history-search-forward   # Down arrow key
-"\e[1~": beginning-of-line       # Home key
-"\e[4~": end-of-line             # End key
