@@ -13,6 +13,7 @@ A collection of quality-of-life tweaks that I like to apply as soon as possible 
 
 ## List of Tweaks
 The script provides the following functions that can be called individually:
+* `tweak_all`: Runs all available `tweak_*` functions.
 * `tweak_bash_aliases`: Adds `ls` alias to `ls --color=auto` and `ll` alias to `ls -al`.
 * `tweak_bash_prompt`: When the current working directory is a Git repository, the bash prompt shows the current Git branch and status [[1](https://code.mendhak.com/simple-bash-prompt-for-developers-ps1-git/)].
 * `tweak_nanorc`: `nano` shows the cursor position.
@@ -46,6 +47,9 @@ The script provides the following functions that can be called individually:
 
     Now you can call any of the available tweak functions directly.
     ```bash
+    # Example: Apply all available tweaks
+    tweak_all
+    
     # Example: Apply the nanorc and bash aliases tweaks
     tweak_nanorc
     tweak_bash_aliases

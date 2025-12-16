@@ -109,7 +109,7 @@ function parse_git_branch {
   git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/ (\1$(parse_git_dirty))/"
 }
 
-export PS1="\t ${debian_chroot:+($debian_chroot)}\u@\h:\[\033[32m\]\w\[\033[33m\]\$(parse_git_branch)\[\033[00m\] $ "
+export PS1="\t ${debian_chroot:+( $debian_chroot )}\u@\h:[\[\033[32m\]\w\[\033[33m\]\]\$(parse_git_branch)\[\033[00m\] $ "
 EOF
   source ~/.bashrc
 }
@@ -162,4 +162,15 @@ tweak_inputrc() {
   if [[ "${changes_made}" == true ]]; then
     echo "Note: Changes to ${inputrc_file} may require restarting your shell or running 'bind -f ${inputrc_file}' to take effect." >&2
   fi
+}
+
+# tweak_all runs all available tweak_* functions
+tweak_all() {
+  local tweak_functions
+  tweak_functions=$(declare -F | awk '{print $3}' | grep '^tweak_' | grep -v '^tweak_all$')
+
+  for func in ${tweak_functions}; do
+    echo "Running ${func}..."
+    "${func}"
+  done
 }
