@@ -100,11 +100,11 @@ tweak_bash_prompt() {
   backup_file ~/.bashrc
   cat >> ~/.bashrc << 'EOF'
 
+# Added by linux-qol-tweaks
 function parse_git_dirty {
   [[ $(git status --porcelain 2> /dev/null) ]] && echo "*"
 }
 
-# Added by linux-qol-tweaks
 function parse_git_branch {
   git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/ (\1$(parse_git_dirty))/"
 }
